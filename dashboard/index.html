@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agentic Mesh Router Simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+        }
+
         .node {
             position: absolute;
             width: 20px;
@@ -14,8 +20,9 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
+
         .node-label {
             position: absolute;
             font-size: 10px;
@@ -25,10 +32,22 @@
             width: 60px;
             text-align: center;
         }
-        .high-congestion { background-color: #ef4444; box-shadow: 0 0 15px #ef4444; }
-        .med-congestion { background-color: #f59e0b; box-shadow: 0 0 15px #f59e0b; }
-        .low-congestion { background-color: #10b981; box-shadow: 0 0 15px #10b981; }
-        
+
+        .high-congestion {
+            background-color: #ef4444;
+            box-shadow: 0 0 15px #ef4444;
+        }
+
+        .med-congestion {
+            background-color: #f59e0b;
+            box-shadow: 0 0 15px #f59e0b;
+        }
+
+        .low-congestion {
+            background-color: #10b981;
+            box-shadow: 0 0 15px #10b981;
+        }
+
         #mesh-canvas {
             position: relative;
             width: 100%;
@@ -38,21 +57,38 @@
             overflow: hidden;
             border: 1px solid #334155;
         }
-        .pulse { animation: pulse-animation 1s infinite; }
+
+        .pulse {
+            animation: pulse-animation 1s infinite;
+        }
+
         @keyframes pulse-animation {
-            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                transform: translate(-50%, -50%) scale(1.1);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
         }
     </style>
 </head>
+
 <body class="p-6">
     <div class="max-w-7xl mx-auto flex flex-col gap-6">
-        
+
         <header class="flex justify-between items-center border-b border-slate-700 pb-4">
             <div>
-                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                    rdcl::tools | Agentic Mesh Router
+                <h1
+                    class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                    Agentic Mesh Router
                 </h1>
                 <p class="text-slate-400 text-sm mt-1">Cognitive routing layer for highly congested LoRa networks.</p>
             </div>
@@ -84,7 +120,8 @@
             <!-- Right: Agentic Reasoning Log -->
             <div class="flex flex-col gap-4">
                 <h2 class="text-lg font-semibold text-slate-200">Agentic Reasoning Log</h2>
-                <div id="log-container" class="bg-slate-800 rounded-lg p-4 font-mono text-xs text-slate-300 h-[600px] overflow-y-auto border border-slate-700 flex flex-col gap-2">
+                <div id="log-container"
+                    class="bg-slate-800 rounded-lg p-4 font-mono text-xs text-slate-300 h-[600px] overflow-y-auto border border-slate-700 flex flex-col gap-2">
                     <!-- Logs injected here -->
                 </div>
             </div>
@@ -92,17 +129,18 @@
     </div>
 
     <script>
-        const ws = new WebSocket(`ws://${window.location.host}/ws`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
         const canvas = document.getElementById('mesh-canvas');
         const logContainer = document.getElementById('log-container');
-        
+
         // Scale 1500m coordinate system to 100% canvas size
         const scaleX = (x) => (x / 1500) * 100;
         const scaleY = (y) => (y / 1500) * 100;
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            
+
             // Update Stats
             document.getElementById('stat-policy').innerText = data.stats.policy || "Unknown";
             document.getElementById('stat-tx').innerText = data.stats.transmissions;
@@ -115,19 +153,19 @@
                     if (!el) {
                         el = document.createElement('div');
                         el.id = `node-${node.id}`;
-                        
+
                         const label = document.createElement('div');
                         label.className = 'node-label';
                         label.innerText = node.id;
                         el.appendChild(label);
-                        
+
                         canvas.appendChild(el);
                     }
-                    
+
                     // Update position
                     el.style.left = `${scaleX(node.x)}%`;
                     el.style.top = `${scaleY(node.y)}%`;
-                    
+
                     // Congestion styling
                     el.className = 'node ';
                     if (node.inbox_size > 30) {
@@ -147,10 +185,10 @@
                 [...data.logs].reverse().forEach(log => {
                     const el = document.createElement('div');
                     el.className = 'p-2 rounded bg-slate-900 border border-slate-700 flex flex-col gap-1';
-                    
+
                     let actionColor = log.action === 'FORWARD' ? 'text-emerald-400' : 'text-red-400';
                     if (log.action === 'RECEIVED') actionColor = 'text-blue-400';
-                    
+
                     el.innerHTML = `
                         <div class="flex justify-between">
                             <span class="font-bold text-slate-400">${log.node_id}</span>
@@ -165,4 +203,5 @@
         };
     </script>
 </body>
+
 </html>
